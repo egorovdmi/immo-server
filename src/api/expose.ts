@@ -19,12 +19,12 @@ export default class UserApi {
   }
 
   public hide(request: Request, response: Response, next?: NextFunction) {
-    const { id } = request.body;
+    const { id, cteatedAt } = request.body;
     const { id: userId } = (request as any).user;
 
     const expose = this.db
       .get("expose")
-      .find({ id, userId })
+      .find({ id, cteatedAt, userId })
       .assign({ isHidden: true })
       .write();
 
