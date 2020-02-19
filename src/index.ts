@@ -54,11 +54,7 @@ class App {
   }
 
   private config(): void {
-    const corsOptions = {
-      origin: process.env.FRONTEND_URI
-    };
-
-    this.app.use(cors(corsOptions));
+    this.app.use(cors());
     this.app.use(pinoHttp({ logger: this.logger }));
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
