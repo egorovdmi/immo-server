@@ -1,6 +1,9 @@
 {
   "name": "immo",
   "version": "1.0.0",
+  "engines": {
+    "node": "12.14.0"
+  },
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
