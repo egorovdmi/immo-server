@@ -40,6 +40,7 @@ const run = async () => {
       .push({ email: response.email, hash, id, name: response.name })
       .write();
 
+    // tslint:disable-next-line:no-console
     console.log("User created");
   }
 };
