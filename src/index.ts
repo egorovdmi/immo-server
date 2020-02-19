@@ -125,7 +125,7 @@ class App {
   }
 
   private listen(): void {
-    const port = process.env.APP_PORT || 3000;
+    const port = process.env.PORT || 3000;
     this.server.listen(port, () => {
       this.logger.info(`Server listening on port ${port}`);
       this.crawler.start();
