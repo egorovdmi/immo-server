@@ -54,7 +54,11 @@ class App {
   }
 
   private config(): void {
-    this.app.use(cors());
+    const corsOptions = {
+      origin: process.env.FRONTEND_URI
+    };
+
+    this.app.use(cors(corsOptions));
     this.app.use(pinoHttp({ logger: this.logger }));
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
@@ -121,8 +125,9 @@ class App {
   }
 
   private listen(): void {
-    this.server.listen(3000, () => {
-      this.logger.info("Server listening on port 3000");
+    const port = process.env.PORT || 3000;
+    this.server.listen(port, () => {
+      this.logger.info(`Server listening on port ${port}`);
       this.crawler.start();
     });
   }
