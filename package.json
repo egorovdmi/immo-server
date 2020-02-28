@@ -14,7 +14,8 @@
     "prettier": "prettier --write \"{,!(node_modules|dist|build|coverage)/**/}*.{js,jsx,ts,tsx,json}\"",
     "pre-commit": "yarn tslint:fix && yarn prettier && yarn build",
     "tslint": "tslint --project tsconfig.json",
-    "tslint:fix": "tslint --project tsconfig.json --fix"
+    "tslint:fix": "tslint --project tsconfig.json --fix",
+    "create-user": "node dist/create-user.js"
   },
   "husky": {
     "hooks": {
@@ -54,6 +55,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-jwt": "^5.3.1",
+    "firebase": "^7.9.2",
     "jsonwebtoken": "^8.5.1",
     "lowdb": "^1.0.0",
     "pino": "^5.16.0",
