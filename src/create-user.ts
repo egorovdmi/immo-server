@@ -1,7 +1,7 @@
 import * as prompts from "prompts";
 import * as dotenv from "dotenv";
-import { firebaseBootstrap } from "firebase-bootstrap";
-import { UserRepository } from "user.repository";
+import { firebaseBootstrap } from "./firebase-bootstrap";
+import { UserRepository } from "./user.repository";
 
 dotenv.config();
 
