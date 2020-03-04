@@ -1,41 +1,14 @@
-import * as bcrypt from "bcrypt";
 import * as prompts from "prompts";
-import { v4 as uuid } from "uuid";
 import * as dotenv from "dotenv";
-import * as firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/database";
+import { firebaseBootstrap } from "firebase-bootstrap";
+import { UserRepository } from "user.repository";
 
 dotenv.config();
 
 const run = async () => {
-  firebase.initializeApp({
-    messagingSenderId: process.env.APP_FIREBASE_SERVER_ID,
-    projectId: process.env.APP_FIREBASE_PROJECT_ID,
-    apiKey: process.env.APP_FIREBASE_API_KEY,
-    appId: process.env.APP_FIREBASE_APP_ID,
-    authDomain: process.env.APP_FIREBASE_AUTH_DOMAIN,
-    databaseURL: process.env.APP_FIREBASE_DATABASE_URL,
-    storageBucket: process.env.APP_FIREBASE_STORAGE_BUCKET
-  });
+  await firebaseBootstrap();
 
-  try {
-    await firebase
-      .auth()
-      .signInWithEmailAndPassword(
-        process.env.APP_FIREBASE_LOGIN,
-        process.env.APP_FIREBASE_PASSWORD
-      );
-  } catch (error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-
-    // tslint:disable-next-line:no-console
-    console.log(
-      `Error has occured. Error code: ${errorCode}, message: ${errorMessage}.`
-    );
-  }
-
+  const userRepository = new UserRepository();
   const response = await prompts([
     {
       message: "Please enter your EMail.",
@@ -55,20 +28,14 @@ const run = async () => {
     }
   ]);
 
-  const id = uuid();
-  const hash = await bcrypt.hash(response.password, 10);
+  let user = await userRepository.single(response.email);
 
-  const database = firebase.database();
-  const query = await database
-    .ref("/users")
-    .orderByChild("email")
-    .equalTo(response.email)
-    .once("value");
-
-  if (!query.val()) {
-    const databaseResponse = await database
-      .ref(`/users/${id}`)
-      .set({ email: response.email, hash, id, name: response.name });
+  if (!user) {
+    user = await userRepository.create(
+      response.email,
+      response.name,
+      response.password
+    );
     // tslint:disable-next-line:no-console
     console.log("User created");
   } else {

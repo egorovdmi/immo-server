@@ -18,6 +18,8 @@ import PushApi from "./api/push";
 import UserApi from "./api/user";
 
 import Crawler from "./crawler";
+import { firebaseBootstrap } from "./firebase-bootstrap";
+import { UserRepository } from "./user.repository";
 
 dotenv.config();
 
@@ -27,11 +29,13 @@ class App {
   private db: LowdbSync<any>;
   private app: express.Application;
   private crawler: Crawler;
+  private userRepository: UserRepository;
 
   constructor() {
     this.app = express();
     this.server = new Server(this.app);
     this.logger = pino({ name: "immo" });
+    this.userRepository = new UserRepository();
 
     const adapter = new FileSync("db.json");
     this.db = lowdb(adapter);
@@ -61,7 +65,7 @@ class App {
   }
 
   private routes(): void {
-    const userApi = new UserApi(this.db, this.logger);
+    const userApi = new UserApi(this.userRepository, this.logger);
     const pushApi = new PushApi(this.db, this.logger);
     const exposeApi = new ExposeApi(this.db, this.logger);
     const crawlerApi = new CrawlerApi(this.db, this.logger, this.crawler);
@@ -129,4 +133,10 @@ class App {
   }
 }
 
-export default new App();
+const run = async () => {
+  await firebaseBootstrap();
+  // tslint:disable-next-line:no-unused-expression
+  new App();
+};
+
+run();
