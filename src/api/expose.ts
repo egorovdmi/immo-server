@@ -1,21 +1,26 @@
 import { NextFunction } from "connect";
 import { Request, Response } from "express";
 import { LowdbSync } from "lowdb";
+import * as _ from "lodash";
 import { Logger } from "pino";
+import { ExposeRepository } from "repositories/expose.repository";
 
 export default class UserApi {
-  constructor(private db: LowdbSync<any>, private logger: Logger) {}
+  constructor(
+    private db: LowdbSync<any>,
+    private exposeRepository: ExposeRepository,
+    private logger: Logger
+  ) {}
 
-  public list(request: Request, response: Response, next?: NextFunction) {
+  public async list(request: Request, response: Response, next?: NextFunction) {
     const { id: userId } = (request as any).user;
 
-    const expose = this.db
-      .get("expose")
-      .filter({ userId })
+    const exposes = await this.exposeRepository.list(userId);
+    _(exposes)
       .values()
       .sortBy("createdAt");
 
-    response.json(expose);
+    response.json(exposes);
   }
 
   public hide(request: Request, response: Response, next?: NextFunction) {
@@ -44,15 +49,11 @@ export default class UserApi {
     response.json(expose);
   }
 
-  public get(request: Request, response: Response, next?: NextFunction) {
+  public async get(request: Request, response: Response, next?: NextFunction) {
     const { id } = request.params;
     const { id: userId } = (request as any).user;
 
-    const expose = this.db
-      .get("expose")
-      .find({ id, userId })
-      .value();
-
+    const expose = await this.exposeRepository.single(id, userId);
     response.json(expose);
   }
 }

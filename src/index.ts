@@ -19,7 +19,8 @@ import UserApi from "./api/user";
 
 import Crawler from "./crawler";
 import { firebaseBootstrap } from "./firebase-bootstrap";
-import { UserRepository } from "./user.repository";
+import { UserRepository } from "./repositories/user.repository";
+import { ExposeRepository } from "./repositories/expose.repository";
 
 dotenv.config();
 
@@ -30,12 +31,14 @@ class App {
   private app: express.Application;
   private crawler: Crawler;
   private userRepository: UserRepository;
+  private exposeRepository: ExposeRepository;
 
   constructor() {
     this.app = express();
     this.server = new Server(this.app);
     this.logger = pino({ name: "immo" });
     this.userRepository = new UserRepository();
+    this.exposeRepository = new ExposeRepository();
 
     const adapter = new FileSync("db.json");
     this.db = lowdb(adapter);
@@ -50,7 +53,7 @@ class App {
       })
       .write();
 
-    this.crawler = new Crawler(this.db, this.logger);
+    this.crawler = new Crawler(this.db, this.exposeRepository, this.logger);
 
     this.config();
     this.routes();
@@ -67,7 +70,11 @@ class App {
   private routes(): void {
     const userApi = new UserApi(this.userRepository, this.logger);
     const pushApi = new PushApi(this.db, this.logger);
-    const exposeApi = new ExposeApi(this.db, this.logger);
+    const exposeApi = new ExposeApi(
+      this.db,
+      this.exposeRepository,
+      this.logger
+    );
     const crawlerApi = new CrawlerApi(this.db, this.logger, this.crawler);
 
     const jwtMiddleware = jwt({ secret: process.env.JWT_SECRET });

@@ -2,7 +2,7 @@ import * as bcrypt from "bcrypt";
 import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { Logger } from "pino";
-import { UserRepository, User } from "user.repository";
+import { UserRepository, User } from "repositories/user.repository";
 
 export default class UserApi {
   constructor(private userRepository: UserRepository, private logger: Logger) {}

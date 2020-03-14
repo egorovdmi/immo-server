@@ -2,9 +2,14 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import { LowdbSync } from "lowdb";
 import { Logger } from "pino";
+import { ExposeRepository } from "repositories/expose.repository";
 
 export default class Crawler {
-  constructor(private db: LowdbSync<any>, private logger: Logger) {}
+  constructor(
+    private db: LowdbSync<any>,
+    private exposeRepository: ExposeRepository,
+    private logger: Logger
+  ) {}
 
   public start(): void {
     setInterval(() => {
@@ -51,12 +56,7 @@ export default class Crawler {
     userId: string,
     dontSendPush: boolean
   ): Promise<void> {
-    if (
-      this.db
-        .get("expose")
-        .find({ id })
-        .value()
-    ) {
+    if (this.exposeRepository.single(id, userId)) {
       return;
     }
 
@@ -112,9 +112,10 @@ export default class Crawler {
       .trim();
     const images = $(".sp-image")
       .map(function() {
-        return $(this).attr("data-src");
+        return $(this).data("src");
       })
-      .toArray();
+      .toArray()
+      .map((item: any) => item as string);
 
     if (address.includes("Anbieter")) {
       address = address.match(/\d+/)[0];
@@ -146,29 +147,26 @@ export default class Crawler {
       "Expose data"
     );
 
-    this.db
-      .get("expose")
-      .push({
-        address,
-        availableFrom,
-        coldRent,
-        constructionYear,
-        createdAt: new Date().getTime(),
-        description,
-        energyType,
-        heatingCosts,
-        id,
-        images,
-        lastRenovated,
-        livingArea,
-        rooms,
-        title,
-        totalRent,
-        type,
-        userId,
-        utilities
-      })
-      .write();
+    this.exposeRepository.create({
+      address,
+      availableFrom,
+      coldRent,
+      constructionYear,
+      createdAt: new Date().getTime(),
+      description,
+      energyType,
+      heatingCosts,
+      id,
+      images,
+      lastRenovated,
+      livingArea,
+      rooms,
+      title,
+      totalRent,
+      type,
+      userId,
+      utilities
+    });
 
     this.logger.info({ dontSendPush });
 
