@@ -16,7 +16,7 @@ export default class UserApi {
     const { id: userId } = (request as any).user;
 
     const exposes = await this.exposeRepository.list(userId);
-    const result = _.orderBy(exposes, ["createdAt"], ["asc"]);
+    const result = _.orderBy(exposes, ["createdAt"], ["desc"]);
 
     response.json(result);
   }
