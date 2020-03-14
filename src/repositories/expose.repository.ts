@@ -53,7 +53,7 @@ export class ExposeRepository {
     const hashTable = query.val();
 
     if (!hashTable) {
-      return null;
+      return [];
     }
 
     const exposeKeys = Object.keys(hashTable);

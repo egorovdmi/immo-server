@@ -56,6 +56,8 @@ export default class Crawler {
     userId: string,
     dontSendPush: boolean
   ): Promise<void> {
+    this.logger.info(`crawlExpose ${id} ${userId}`);
+
     if (this.exposeRepository.single(id, userId)) {
       return;
     }
@@ -147,7 +149,7 @@ export default class Crawler {
       "Expose data"
     );
 
-    this.exposeRepository.create({
+    await this.exposeRepository.create({
       address,
       availableFrom,
       coldRent,
