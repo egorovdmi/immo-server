@@ -154,7 +154,7 @@ export default class Crawler {
       availableFrom,
       coldRent,
       constructionYear,
-      createdAt: new Date().getTime(),
+      createdAt: Date.now(),
       description,
       energyType,
       heatingCosts,
