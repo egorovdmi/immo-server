@@ -58,7 +58,7 @@ export default class Crawler {
   ): Promise<void> {
     this.logger.info(`crawlExpose ${id} ${userId}`);
 
-    if (this.exposeRepository.single(id, userId)) {
+    if (await this.exposeRepository.single(id, userId)) {
       return;
     }
 
