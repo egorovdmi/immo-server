@@ -16,11 +16,11 @@ export default class UserApi {
     const { id: userId } = (request as any).user;
 
     const exposes = await this.exposeRepository.list(userId);
-    _(exposes)
+    const result = _(exposes)
       .values()
       .sortBy("createdAt");
 
-    response.json(exposes);
+    response.json(result);
   }
 
   public hide(request: Request, response: Response, next?: NextFunction) {
