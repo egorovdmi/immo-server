@@ -86,6 +86,10 @@ class App {
 
     const jwtMiddleware = jwt({ secret: process.env.JWT_SECRET });
 
+    this.app.get("/", (_, res) => {
+      return res.send("Hello");
+    });
+
     this.app.post("/api/users/token", (...args) =>
       userApi.createToken(...args)
     );
