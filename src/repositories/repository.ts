@@ -67,7 +67,7 @@ export class Repository<T extends Entity> {
       const entities = entityKeys.map(
         (entityKey: string) => hashTable[userId][entityKey]
       );
-      return [...acc, entities];
+      return [...acc, ...entities];
     }, []) as T[];
     return result;
   }

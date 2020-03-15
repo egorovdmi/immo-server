@@ -9,6 +9,8 @@ export default class PushApi {
     const { id: userId } = (request as any).user;
     const { token } = request.body;
 
+    this.logger.info({ method: "subscribe", userId, token });
+
     if (
       !this.db
         .get("tokens")
