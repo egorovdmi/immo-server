@@ -20,7 +20,7 @@ import Crawler from "./crawler";
 import { firebaseBootstrap } from "./firebase-bootstrap";
 import { UserRepository } from "./repositories/user.repository";
 import { ExposeRepository } from "./repositories/expose.repository";
-import { CrawlerItemRepository } from "repositories/crawler-item.repository";
+import { CrawlerItemRepository } from "./repositories/crawler-item.repository";
 
 dotenv.config();
 

@@ -4,7 +4,7 @@ import { LowdbSync } from "lowdb";
 import { Logger } from "pino";
 
 import Crawler from "../crawler";
-import { CrawlerItemRepository } from "repositories/crawler-item.repository";
+import { CrawlerItemRepository } from "../repositories/crawler-item.repository";
 
 export default class CrawlerApi {
   constructor(
