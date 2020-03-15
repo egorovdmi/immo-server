@@ -16,6 +16,7 @@ export default class Crawler {
   public start(): void {
     setInterval(async () => {
       const crawlerItems = await this.clawlerItemRepository.all();
+      this.logger.info({ message: "crawling round", crawlerItems });
       crawlerItems.map(item => this.crawl(item.url, item.userId));
     }, 60000);
   }
