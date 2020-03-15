@@ -2,18 +2,20 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import { LowdbSync } from "lowdb";
 import { Logger } from "pino";
-import { ExposeRepository } from "repositories/expose.repository";
+import { ExposeRepository } from "./repositories/expose.repository";
+import { CrawlerItemRepository } from "./repositories/crawler-item.repository";
 
 export default class Crawler {
   constructor(
     private db: LowdbSync<any>,
+    private clawlerItemRepository: CrawlerItemRepository,
     private exposeRepository: ExposeRepository,
     private logger: Logger
   ) {}
 
   public start(): void {
-    setInterval(() => {
-      const crawlerItems = this.db.get("crawlerItems").value();
+    setInterval(async () => {
+      const crawlerItems = await this.clawlerItemRepository.all();
       crawlerItems.map(item => this.crawl(item.url, item.userId));
     }, 60000);
   }
@@ -42,11 +44,12 @@ export default class Crawler {
       this.logger.error(error, "Crawl Expose error")
     );
 
-    this.db
-      .get("crawlerItems")
-      .find({ url, userId })
-      .assign({ lastTimeCrawled: +new Date() })
-      .write();
+    await this.clawlerItemRepository.update({
+      id: url,
+      url,
+      userId,
+      lastTimeCrawled: +new Date()
+    });
 
     this.logger.info("done");
   }

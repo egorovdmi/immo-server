@@ -2,7 +2,6 @@ import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import * as dotenv from "dotenv";
 import * as express from "express";
-import { Request, Response } from "express";
 import * as jwt from "express-jwt";
 import { Server } from "http";
 import * as lowdb from "lowdb";
@@ -21,6 +20,7 @@ import Crawler from "./crawler";
 import { firebaseBootstrap } from "./firebase-bootstrap";
 import { UserRepository } from "./repositories/user.repository";
 import { ExposeRepository } from "./repositories/expose.repository";
+import { CrawlerItemRepository } from "repositories/crawler-item.repository";
 
 dotenv.config();
 
@@ -32,6 +32,7 @@ class App {
   private crawler: Crawler;
   private userRepository: UserRepository;
   private exposeRepository: ExposeRepository;
+  private crawlerItemRepository: CrawlerItemRepository;
 
   constructor() {
     this.app = express();
@@ -39,6 +40,7 @@ class App {
     this.logger = pino({ name: "immo" });
     this.userRepository = new UserRepository();
     this.exposeRepository = new ExposeRepository();
+    this.crawlerItemRepository = new CrawlerItemRepository();
 
     const adapter = new FileSync("db.json");
     this.db = lowdb(adapter);
@@ -53,7 +55,12 @@ class App {
       })
       .write();
 
-    this.crawler = new Crawler(this.db, this.exposeRepository, this.logger);
+    this.crawler = new Crawler(
+      this.db,
+      this.crawlerItemRepository,
+      this.exposeRepository,
+      this.logger
+    );
 
     this.config();
     this.routes();
@@ -70,12 +77,12 @@ class App {
   private routes(): void {
     const userApi = new UserApi(this.userRepository, this.logger);
     const pushApi = new PushApi(this.db, this.logger);
-    const exposeApi = new ExposeApi(
-      this.db,
-      this.exposeRepository,
-      this.logger
+    const exposeApi = new ExposeApi(this.exposeRepository, this.logger);
+    const crawlerApi = new CrawlerApi(
+      this.crawlerItemRepository,
+      this.logger,
+      this.crawler
     );
-    const crawlerApi = new CrawlerApi(this.db, this.logger, this.crawler);
 
     const jwtMiddleware = jwt({ secret: process.env.JWT_SECRET });
 

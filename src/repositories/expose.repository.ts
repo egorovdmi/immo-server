@@ -1,4 +1,4 @@
-import * as firebase from "firebase/app";
+import { Repository } from "./repository";
 
 export interface Expose {
   id: string;
@@ -19,45 +19,12 @@ export interface Expose {
   type: string;
   userId: string;
   utilities: string;
+  isHidden?: boolean;
+  hasBeenContacted?: boolean;
 }
 
-export class ExposeRepository {
-  public async single(id: string, userId: string): Promise<Expose> {
-    const database = firebase.database();
-    const query = await database
-      .ref(`/expose/${userId}`)
-      .orderByChild("id")
-      .equalTo(id)
-      .once("value");
-
-    const value = query.val();
-
-    if (!value) {
-      return null;
-    }
-
-    const exposeKey = Object.keys(value)[0];
-    const result = value[exposeKey] as Expose;
-    return result;
-  }
-
-  public async create(expose: Expose): Promise<void> {
-    const database = firebase.database();
-    await database.ref(`/expose/${expose.userId}`).push(expose);
-  }
-
-  public async list(userId: string): Promise<Expose[]> {
-    const database = firebase.database();
-    const query = await database.ref(`/expose/${userId}`).once("value");
-
-    const hashTable = query.val();
-
-    if (!hashTable) {
-      return [];
-    }
-
-    const exposeKeys = Object.keys(hashTable);
-    const result = exposeKeys.map((key: string) => hashTable[key] as Expose);
-    return result;
+export class ExposeRepository extends Repository<Expose> {
+  constructor() {
+    super("/expose");
   }
 }

@@ -1,13 +1,11 @@
 import { NextFunction } from "connect";
 import { Request, Response } from "express";
-import { LowdbSync } from "lowdb";
 import * as _ from "lodash";
 import { Logger } from "pino";
 import { ExposeRepository } from "repositories/expose.repository";
 
 export default class UserApi {
   constructor(
-    private db: LowdbSync<any>,
     private exposeRepository: ExposeRepository,
     private logger: Logger
   ) {}
@@ -21,28 +19,28 @@ export default class UserApi {
     response.json(result);
   }
 
-  public hide(request: Request, response: Response, next?: NextFunction) {
+  public async hide(request: Request, response: Response, next?: NextFunction) {
     const { id, createdAt } = request.body;
     const { id: userId } = (request as any).user;
 
-    const expose = this.db
-      .get("expose")
-      .find({ id, createdAt, userId })
-      .assign({ isHidden: true })
-      .write();
+    const expose = await this.exposeRepository.single(id, userId);
+    expose.isHidden = true;
+    await this.exposeRepository.update(expose);
 
     response.json(expose);
   }
 
-  public contacted(request: Request, response: Response, next?: NextFunction) {
+  public async contacted(
+    request: Request,
+    response: Response,
+    next?: NextFunction
+  ) {
     const { id } = request.body;
     const { id: userId } = (request as any).user;
 
-    const expose = this.db
-      .get("expose")
-      .find({ id, userId })
-      .assign({ hasBeenContacted: true })
-      .write();
+    const expose = await this.exposeRepository.single(id, userId);
+    expose.hasBeenContacted = true;
+    await this.exposeRepository.update(expose);
 
     response.json(expose);
   }
