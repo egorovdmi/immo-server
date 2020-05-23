@@ -1,3 +1,4 @@
+import { Logger } from "pino";
 import { Repository } from "./repository";
 
 export interface CrawlerItem {
@@ -8,7 +9,7 @@ export interface CrawlerItem {
 }
 
 export class CrawlerItemRepository extends Repository<CrawlerItem> {
-  constructor() {
-    super("/crowler-items");
+  constructor(logger: Logger) {
+    super("/crowler-items", logger);
   }
 }

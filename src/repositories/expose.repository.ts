@@ -1,3 +1,4 @@
+import { Logger } from "pino";
 import { Repository } from "./repository";
 
 export interface Expose {
@@ -24,7 +25,7 @@ export interface Expose {
 }
 
 export class ExposeRepository extends Repository<Expose> {
-  constructor() {
-    super("/expose");
+  constructor(logger: Logger) {
+    super("/expose", logger);
   }
 }

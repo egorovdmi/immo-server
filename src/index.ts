@@ -39,8 +39,8 @@ class App {
     this.server = new Server(this.app);
     this.logger = pino({ name: "immo" });
     this.userRepository = new UserRepository();
-    this.exposeRepository = new ExposeRepository();
-    this.crawlerItemRepository = new CrawlerItemRepository();
+    this.exposeRepository = new ExposeRepository(this.logger);
+    this.crawlerItemRepository = new CrawlerItemRepository(this.logger);
 
     const adapter = new FileSync("db.json");
     this.db = lowdb(adapter);
