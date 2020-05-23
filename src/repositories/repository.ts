@@ -56,7 +56,7 @@ export class Repository<T extends Entity> {
       return this.cache;
     }
 
-    this.logger.info('requesting all items from remote database...');
+    this.logger.info("requesting all items from remote database...");
     const database = firebase.database();
     const query = await database.ref(`${this.resourceBasePath}`).once("value");
 
@@ -132,12 +132,12 @@ export class Repository<T extends Entity> {
   }
 
   private putItemToCache(item: T): void {
-    this.logger.info('putting the item into the cache: ', item);
+    this.logger.info("putting the item into the cache: ", item);
     this.cache.push(item);
   }
 
   private updateCachedItem(entity: T): void {
-    this.logger.info('updating the cache item: ', entity);
+    this.logger.info("updating the cache item: ", entity);
     const cachedItem: T = this.singleFromCache(entity.id, entity.userId);
     if (cachedItem) {
       const keys = Object.keys(entity);
@@ -156,7 +156,7 @@ export class Repository<T extends Entity> {
   }
 
   private updateCache(entities: T[]): void {
-    this.logger.info('updating the entire cache...');
+    this.logger.info("updating the entire cache...");
     this.cache = [...entities];
   }
 }
