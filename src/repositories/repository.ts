@@ -10,8 +10,7 @@ export class Repository<T extends Entity> {
   private cache: T[] = [];
   private isSyncedWithRemote = false;
 
-  constructor(private resourceBasePath: string, private logger: Logger) { 
-  }
+  constructor(private resourceBasePath: string, private logger: Logger) {}
 
   public async single(id: string, userId: string): Promise<T> {
     const cachedItem: T = this.singleFromCache(id, userId);
@@ -126,7 +125,9 @@ export class Repository<T extends Entity> {
   }
 
   private singleFromCache(id: string, userId: string): T {
-    return this.cache.find((item: T) => item.id === id && item.userId === userId);
+    return this.cache.find(
+      (item: T) => item.id === id && item.userId === userId
+    );
   }
 
   private putItemToCache(item: T): void {
@@ -137,7 +138,7 @@ export class Repository<T extends Entity> {
     const cachedItem: T = this.singleFromCache(entity.id, entity.userId);
     if (cachedItem) {
       const keys = Object.keys(entity);
-      keys.forEach((key: string) => cachedItem[key] = entity[key]);
+      keys.forEach((key: string) => (cachedItem[key] = entity[key]));
     } else {
       this.putItemToCache(entity);
     }
