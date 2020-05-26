@@ -1,5 +1,5 @@
-import { Logger } from "pino";
-import { Repository } from "./repository";
+import { Logger } from 'pino';
+import { Repository } from './repository';
 
 export interface CrawlerItem {
   id: string;
@@ -10,6 +10,6 @@ export interface CrawlerItem {
 
 export class CrawlerItemRepository extends Repository<CrawlerItem> {
   constructor(logger: Logger) {
-    super("/crowler-items", logger);
+    super('/crowler-items', logger);
   }
 }

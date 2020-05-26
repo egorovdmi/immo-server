@@ -1,5 +1,5 @@
-import * as firebase from "firebase/app";
-import { Logger } from "pino";
+import * as firebase from 'firebase/app';
+import { Logger } from 'pino';
 
 export interface Entity {
   id: string;
@@ -21,9 +21,9 @@ export class Repository<T extends Entity> {
     const database = firebase.database();
     const query = await database
       .ref(`${this.resourceBasePath}/${userId}`)
-      .orderByChild("id")
+      .orderByChild('id')
       .equalTo(id)
-      .once("value");
+      .once('value');
 
     const value = query.val();
 
@@ -39,9 +39,7 @@ export class Repository<T extends Entity> {
 
   public async create(entity: T): Promise<void> {
     const database = firebase.database();
-    await database
-      .ref(`${this.resourceBasePath}/${entity.userId}`)
-      .push(entity);
+    await database.ref(`${this.resourceBasePath}/${entity.userId}`).push(entity);
 
     this.updateCachedItem(entity);
   }
@@ -56,9 +54,9 @@ export class Repository<T extends Entity> {
       return this.cache;
     }
 
-    this.logger.info("requesting all items from remote database...");
+    this.logger.info('requesting all items from remote database...');
     const database = firebase.database();
-    const query = await database.ref(`${this.resourceBasePath}`).once("value");
+    const query = await database.ref(`${this.resourceBasePath}`).once('value');
 
     const hashTable = query.val();
 
@@ -69,9 +67,7 @@ export class Repository<T extends Entity> {
     const userIds = Object.keys(hashTable);
     const result = userIds.reduce((acc: T[], userId: string) => {
       const entityKeys = Object.keys(hashTable[userId]);
-      const entities = entityKeys.map(
-        (entityKey: string) => hashTable[userId][entityKey]
-      );
+      const entities = entityKeys.map((entityKey: string) => hashTable[userId][entityKey]);
       return [...acc, ...entities];
     }, []) as T[];
 
@@ -94,10 +90,7 @@ export class Repository<T extends Entity> {
   }
 
   public async update(entity: T): Promise<T> {
-    const storedEntityPath = await this.getResourcePath(
-      entity.id,
-      entity.userId
-    );
+    const storedEntityPath = await this.getResourcePath(entity.id, entity.userId);
     if (!storedEntityPath) {
       return null;
     }
@@ -112,9 +105,9 @@ export class Repository<T extends Entity> {
     const database = firebase.database();
     const query = await database
       .ref(`${this.resourceBasePath}/${userId}`)
-      .orderByChild("id")
+      .orderByChild('id')
       .equalTo(id)
-      .once("value");
+      .once('value');
 
     const value = query.val();
 
@@ -126,18 +119,16 @@ export class Repository<T extends Entity> {
   }
 
   private singleFromCache(id: string, userId: string): T {
-    return this.cache.find(
-      (item: T) => item.id === id && item.userId === userId
-    );
+    return this.cache.find((item: T) => item.id === id && item.userId === userId);
   }
 
   private putItemToCache(item: T): void {
-    this.logger.info("putting the item into the cache: ", item);
+    this.logger.info('putting the item into the cache: ', item);
     this.cache.push(item);
   }
 
   private updateCachedItem(entity: T): void {
-    this.logger.info("updating the cache item: ", entity);
+    this.logger.info('updating the cache item: ', entity);
     const cachedItem: T = this.singleFromCache(entity.id, entity.userId);
     if (cachedItem) {
       const keys = Object.keys(entity);
@@ -156,7 +147,7 @@ export class Repository<T extends Entity> {
   }
 
   private updateCache(entities: T[]): void {
-    this.logger.info("updating the entire cache...");
+    this.logger.info('updating the entire cache...');
     this.cache = [...entities];
   }
 }

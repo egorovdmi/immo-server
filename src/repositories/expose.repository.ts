@@ -1,5 +1,5 @@
-import { Logger } from "pino";
-import { Repository } from "./repository";
+import { Logger } from 'pino';
+import { Repository } from './repository';
 
 export interface Expose {
   id: string;
@@ -26,6 +26,6 @@ export interface Expose {
 
 export class ExposeRepository extends Repository<Expose> {
   constructor(logger: Logger) {
-    super("/expose", logger);
+    super('/expose', logger);
   }
 }

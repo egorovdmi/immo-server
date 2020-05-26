@@ -1,17 +1,13 @@
-import * as bcrypt from "bcrypt";
-import { NextFunction, Request, Response } from "express";
-import * as jwt from "jsonwebtoken";
-import { Logger } from "pino";
-import { UserRepository, User } from "repositories/user.repository";
+import * as bcrypt from 'bcrypt';
+import { NextFunction, Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
+import { Logger } from 'pino';
+import { UserRepository, User } from 'repositories/user.repository';
 
 export default class UserApi {
   constructor(private userRepository: UserRepository, private logger: Logger) {}
 
-  public async createToken(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  public async createToken(request: Request, response: Response, next: NextFunction) {
     const dbUser: User = await this.userRepository.single(request.body.email);
 
     if (!dbUser) {
@@ -29,7 +25,7 @@ export default class UserApi {
     const user = {
       email: dbUser.email,
       id: dbUser.id,
-      name: dbUser.name
+      name: dbUser.name,
     };
 
     const token = jwt.sign(user, process.env.JWT_SECRET);

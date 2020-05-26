@@ -1,20 +1,17 @@
-import { NextFunction } from "connect";
-import { Request, Response } from "express";
-import * as _ from "lodash";
-import { Logger } from "pino";
-import { ExposeRepository } from "repositories/expose.repository";
+import { NextFunction } from 'connect';
+import { Request, Response } from 'express';
+import * as _ from 'lodash';
+import { Logger } from 'pino';
+import { ExposeRepository } from 'repositories/expose.repository';
 
 export default class UserApi {
-  constructor(
-    private exposeRepository: ExposeRepository,
-    private logger: Logger
-  ) {}
+  constructor(private exposeRepository: ExposeRepository, private logger: Logger) {}
 
   public async list(request: Request, response: Response, next?: NextFunction) {
     const { id: userId } = (request as any).user;
 
     const exposes = await this.exposeRepository.list(userId);
-    const result = _.orderBy(exposes, ["createdAt"], ["desc"]);
+    const result = _.orderBy(exposes, ['createdAt'], ['desc']);
 
     response.json(result);
   }
@@ -30,11 +27,7 @@ export default class UserApi {
     response.json(expose);
   }
 
-  public async contacted(
-    request: Request,
-    response: Response,
-    next?: NextFunction
-  ) {
+  public async contacted(request: Request, response: Response, next?: NextFunction) {
     const { id } = request.body;
     const { id: userId } = (request as any).user;
 

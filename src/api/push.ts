@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import { LowdbSync } from "lowdb";
-import { Logger } from "pino";
+import { NextFunction, Request, Response } from 'express';
+import { LowdbSync } from 'lowdb';
+import { Logger } from 'pino';
 
 export default class PushApi {
   constructor(private db: LowdbSync<any>, private logger: Logger) {}
@@ -9,16 +9,16 @@ export default class PushApi {
     const { id: userId } = (request as any).user;
     const { token } = request.body;
 
-    this.logger.info({ method: "subscribe", userId, token });
+    this.logger.info({ method: 'subscribe', userId, token });
 
     if (
       !this.db
-        .get("tokens")
+        .get('tokens')
         .find({ userId, token })
         .value()
     ) {
       this.db
-        .get("tokens")
+        .get('tokens')
         .push({ userId, token })
         .write();
     }
@@ -31,7 +31,7 @@ export default class PushApi {
     const { token } = request.body;
 
     this.db
-      .get("tokens")
+      .get('tokens')
       .remove({ userId, token })
       .write();
 

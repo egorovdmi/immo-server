@@ -1,17 +1,13 @@
-import { NextFunction } from "connect";
-import { Request, Response } from "express";
-import { LowdbSync } from "lowdb";
-import { Logger } from "pino";
+import { NextFunction } from 'connect';
+import { Request, Response } from 'express';
+import { LowdbSync } from 'lowdb';
+import { Logger } from 'pino';
 
-import Crawler from "../crawler";
-import { CrawlerItemRepository } from "../repositories/crawler-item.repository";
+import Crawler from '../crawler';
+import { CrawlerItemRepository } from '../repositories/crawler-item.repository';
 
 export default class CrawlerApi {
-  constructor(
-    private crawlerItemRepository: CrawlerItemRepository,
-    private logger: Logger,
-    private crawler: Crawler
-  ) {}
+  constructor(private crawlerItemRepository: CrawlerItemRepository, private logger: Logger, private crawler: Crawler) {}
 
   public async list(request: Request, response: Response, next?: NextFunction) {
     const { id: userId } = (request as any).user;
@@ -28,18 +24,14 @@ export default class CrawlerApi {
       id: url,
       url,
       userId,
-      lastTimeCrawled: null
+      lastTimeCrawled: null,
     });
     this.crawler.crawl(url, userId, true);
 
     response.status(201).send();
   }
 
-  public async remove(
-    request: Request,
-    response: Response,
-    next?: NextFunction
-  ) {
+  public async remove(request: Request, response: Response, next?: NextFunction) {
     const { url } = request.body;
     const { id: userId } = (request as any).user;
 
