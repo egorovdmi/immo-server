@@ -190,9 +190,9 @@ export default class Crawler {
 
     await this.telegramBot.sendMessage(
       process.env.TELEGRAM_CHAT_ID,
-      `*${totalRent} ${title}*
-${rooms} rooms flat, ${livingArea}m
-[inline URL](https://www.immobilienscout24.de/expose/${id})
+      `${totalRent} ${title}
+${rooms} rooms flat, ${livingArea}
+https://www.immobilienscout24.de/expose/${id}
 `,
     );
   }
