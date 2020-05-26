@@ -1,65 +1,55 @@
-import axios from "axios";
-import * as cheerio from "cheerio";
-import { LowdbSync } from "lowdb";
-import { Logger } from "pino";
-import { ExposeRepository } from "./repositories/expose.repository";
-import { CrawlerItemRepository } from "./repositories/crawler-item.repository";
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+import { LowdbSync } from 'lowdb';
+import { Logger } from 'pino';
+import { ExposeRepository } from './repositories/expose.repository';
+import { CrawlerItemRepository } from './repositories/crawler-item.repository';
+import { TelegramBot } from './api/telegram-bot';
 
 export default class Crawler {
   constructor(
     private db: LowdbSync<any>,
     private clawlerItemRepository: CrawlerItemRepository,
     private exposeRepository: ExposeRepository,
-    private logger: Logger
+    private telegramBot: TelegramBot,
+    private logger: Logger,
   ) {}
 
   public start(): void {
     setInterval(async () => {
       const crawlerItems = await this.clawlerItemRepository.all();
-      this.logger.info({ message: "crawling round", crawlerItems });
+      this.logger.info({ message: 'crawling round', crawlerItems });
       crawlerItems.map(item => this.crawl(item.url, item.userId));
     }, 60000);
   }
 
-  public async crawl(
-    url: string,
-    userId: string,
-    dontSendPush = false
-  ): Promise<void> {
+  public async crawl(url: string, userId: string, dontSendPush = false): Promise<void> {
     this.logger.info({ url, userId });
     const { data } = await axios(url);
     const $ = cheerio.load(data);
 
-    const allExposeIds = $("a[data-go-to-expose-id]")
+    const allExposeIds = $('a[data-go-to-expose-id]')
       .map(function() {
-        return $(this).attr("data-go-to-expose-id");
+        return $(this).attr('data-go-to-expose-id');
       })
       .toArray();
     const uniqueEposeIds = [...new Set(allExposeIds)];
 
-    const crawlPromises = uniqueEposeIds.map(id =>
-      this.crawlExpose(id.toString(), userId, dontSendPush)
-    );
+    const crawlPromises = uniqueEposeIds.map(id => this.crawlExpose(id.toString(), userId, dontSendPush));
 
-    Promise.all(crawlPromises).catch(error =>
-      this.logger.error(error, "Crawl Expose error")
-    );
+    Promise.all(crawlPromises).catch(error => this.logger.error(error, 'Crawl Expose error'));
 
     await this.clawlerItemRepository.update({
       id: url,
       url,
       userId,
-      lastTimeCrawled: +new Date()
+      lastTimeCrawled: +new Date(),
     });
 
-    this.logger.info("done");
+    this.logger.info('done');
   }
 
-  private async crawlExpose(
-    id: string,
-    userId: string,
-    dontSendPush: boolean
-  ): Promise<void> {
+  private async crawlExpose(id: string, userId: string, dontSendPush: boolean): Promise<void> {
     this.logger.info(`crawlExpose ${id} ${userId}`);
 
     if (await this.exposeRepository.single(id, userId)) {
@@ -70,64 +60,64 @@ export default class Crawler {
     const { data } = await axios(url);
     const $ = cheerio.load(data);
 
-    const title = $("#expose-title")
+    const title = $('#expose-title')
       .text()
       .trim();
-    const availableFrom = $(".is24qa-bezugsfrei-ab")
+    const availableFrom = $('.is24qa-bezugsfrei-ab')
       .text()
       .trim();
-    const livingArea = $(".is24qa-wohnflaeche-ca")
+    const livingArea = $('.is24qa-wohnflaeche-ca')
       .text()
       .trim();
-    const rooms = $(".is24qa-zimmer")
+    const rooms = $('.is24qa-zimmer')
       .text()
       .trim();
-    const type = $(".is24qa-typ")
+    const type = $('.is24qa-typ')
       .text()
       .trim();
-    const lastRenovated = $(".is24qa-modernisierung-sanierung")
+    const lastRenovated = $('.is24qa-modernisierung-sanierung')
       .text()
       .trim();
-    const constructionYear = $(".is24qa-baujahr")
+    const constructionYear = $('.is24qa-baujahr')
       .text()
       .trim();
-    const energyType = $(".is24qa-heizungsart")
+    const energyType = $('.is24qa-heizungsart')
       .text()
       .trim();
-    const description = $(".is24-text")
+    const description = $('.is24-text')
       .text()
       .trim();
-    let address = $(".address-block")
+    let address = $('.address-block')
       .first()
       .text()
       .trim();
-    const coldRent = $(".is24qa-kaltmiete")
+    const coldRent = $('.is24qa-kaltmiete')
       .first()
       .text()
       .trim();
-    const utilities = $(".is24qa-nebenkosten")
+    const utilities = $('.is24qa-nebenkosten')
       .text()
-      .replace("+", "")
+      .replace('+', '')
       .trim();
-    const heatingCosts = $(".is24qa-heizkosten")
+    const heatingCosts = $('.is24qa-heizkosten')
       .text()
-      .replace("+", "")
+      .replace('+', '')
       .trim();
-    const totalRent = $(".is24qa-gesamtmiete")
+    const totalRent = $('.is24qa-gesamtmiete')
       .text()
       .trim();
-    const images = $(".sp-image")
+    const images = $('.sp-image')
       .map(function() {
-        return $(this).data("src");
+        return $(this).data('src');
       })
       .toArray()
       .map((item: any) => item as string);
 
-    if (address.includes("Anbieter")) {
+    if (address.includes('Anbieter')) {
       address = address.match(/\d+/)[0];
     }
 
-    if (title.includes("Modell")) {
+    if (title.includes('Modell')) {
       return;
     }
 
@@ -148,9 +138,9 @@ export default class Crawler {
         title,
         totalRent,
         type,
-        utilities
+        utilities,
       },
-      "Expose data"
+      'Expose data',
     );
 
     await this.exposeRepository.create({
@@ -171,7 +161,7 @@ export default class Crawler {
       totalRent,
       type,
       userId,
-      utilities
+      utilities,
     });
 
     this.logger.info({ dontSendPush });
@@ -191,22 +181,25 @@ export default class Crawler {
           `Heizkosten: ${heatingCosts}`,
           `Nebenkosten: ${utilities}`,
           `Renoviert: ${lastRenovated}`,
-          `Type: ${type}`
-        ].join("\n"),
+          `Type: ${type}`,
+        ].join('\n'),
         id,
-        userId
+        userId,
       );
     }
+
+    await this.telegramBot.sendMessage(
+      process.env.TELEGRAM_CHAT_ID,
+      `*${totalRent} ${title}*
+${rooms} rooms flat, ${livingArea}m
+[inline URL](https://www.immobilienscout24.de/expose/${id})
+`,
+    );
   }
 
-  private async sendPush(
-    title: string,
-    message: string,
-    exposeId: string,
-    userId: string
-  ) {
+  private async sendPush(title: string, message: string, exposeId: string, userId: string) {
     const tokens = this.db
-      .get("tokens")
+      .get('tokens')
       .filter({ userId })
       .value();
 
@@ -216,29 +209,29 @@ export default class Crawler {
           notification: {
             body: message,
             data: { exposeId, url: `${process.env.FRONTEND_URI}/${exposeId}` },
-            title
-          }
+            title,
+          },
         },
-        to: (item as any).token
+        to: (item as any).token,
       };
 
-      this.logger.info(data, "Sending push");
+      this.logger.info(data, 'Sending push');
 
       axios({
         data,
         headers: {
-          Authorization: `key=${process.env.FCM_AUTHORIZATION_KEY}`
+          Authorization: `key=${process.env.FCM_AUTHORIZATION_KEY}`,
         },
-        method: "POST",
-        url: "https://fcm.googleapis.com/fcm/send"
+        method: 'POST',
+        url: 'https://fcm.googleapis.com/fcm/send',
       }).catch(err =>
         this.logger.error(
           {
             data: err.response.data,
-            status: err.response.status
+            status: err.response.status,
           },
-          "Sending push failed"
-        )
+          'Sending push failed',
+        ),
       );
     });
   }
