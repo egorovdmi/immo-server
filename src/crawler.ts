@@ -252,14 +252,18 @@ export default class Crawler {
   private extractNumber(value: string): number {
     const result = [];
     const symbols = '0123456789'.split('');
-
-    for (const symbol of value) {
-      if (symbols.includes(symbol)) {
-        result.push(symbol);
+  
+    for (const character of value) {
+      if (symbols.includes(character)) {
+        result.push(character);
+      }
+  
+      if (character === ',') {
+        result.push('.');
       }
     }
-
-    const extractedValue = parseInt(result.join(), 10);
+  
+    const extractedValue = parseInt(result.join(''), 10);
     return Number.isNaN(extractedValue) ? 0 : extractedValue;
   }
 }
