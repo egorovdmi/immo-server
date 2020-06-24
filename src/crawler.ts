@@ -103,6 +103,10 @@ export default class Crawler {
       .text()
       .replace('+', '')
       .trim();
+    const garageCost = $('.is24qa-miete-fuer-garagestellplatz')
+      .text()
+      .replace('+', '')
+      .trim();
     const totalRent = $('.is24qa-gesamtmiete')
       .text()
       .trim();
@@ -188,13 +192,17 @@ export default class Crawler {
       );
     }
 
-    await this.telegramBot.sendMessage(
-      process.env.TELEGRAM_CHAT_ID,
-      `${totalRent} ${title}
-${rooms} rooms flat, ${livingArea}
-https://www.immobilienscout24.de/expose/${id}
-`,
-    );
+    const totalPrice = this.extractNumber(totalRent) + this.extractNumber(garageCost) + 50;
+
+    if (totalPrice < 1600) {
+      await this.telegramBot.sendMessage(
+        process.env.TELEGRAM_CHAT_ID,
+        `${totalPrice} € ${title}
+  ${rooms} rooms flat, ${livingArea}
+  https://www.immobilienscout24.de/expose/${id}
+  `,
+      );
+    }
   }
 
   private async sendPush(title: string, message: string, exposeId: string, userId: string) {
@@ -234,5 +242,19 @@ https://www.immobilienscout24.de/expose/${id}
         ),
       );
     });
+  }
+
+  private extractNumber(value: string): number {
+    const result = [];
+    const symbols = '0123456789'.split('');
+
+    for (const symbol of value) {
+      if (symbols.includes(symbol)) {
+        result.push(symbol);
+      }
+    }
+
+    const extractedValue = parseInt(result.join(), 10);
+    return Number.isNaN(extractedValue) ? 0 : extractedValue;
   }
 }
