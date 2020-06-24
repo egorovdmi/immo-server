@@ -1,5 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { Subject } from 'rxjs';
+import { debounce, delay } from 'rxjs/operators';
 import { LowdbSync } from 'lowdb';
 import { Logger } from 'pino';
 import { ExposeRepository } from './repositories/expose.repository';
@@ -7,6 +9,8 @@ import { CrawlerItemRepository } from './repositories/crawler-item.repository';
 import { TelegramBot } from './api/telegram-bot';
 
 export default class Crawler {
+  private sendTelegramPushQueue: Subject<string> = new Subject<string>();
+
   constructor(
     private db: LowdbSync<any>,
     private clawlerItemRepository: CrawlerItemRepository,
@@ -21,6 +25,10 @@ export default class Crawler {
       this.logger.info({ message: 'crawling round', crawlerItems });
       crawlerItems.map(item => this.crawl(item.url, item.userId));
     }, 60000);
+
+    this.sendTelegramPushQueue.pipe(delay(1000)).subscribe(async (message: string) => {
+      await this.telegramBot.sendMessage(process.env.TELEGRAM_CHAT_ID, message);
+    });
   }
 
   public async crawl(url: string, userId: string, dontSendPush = false): Promise<void> {
@@ -193,20 +201,14 @@ export default class Crawler {
     }
 
     const totalPrice = this.extractNumber(totalRent) + this.extractNumber(garageCost) + 50;
-
-    this.logger.info(`${totalPrice} € ${title}
+    const telegramMessage = `${totalPrice} € ${title}
     ${rooms} rooms flat, ${livingArea}
     https://www.immobilienscout24.de/expose/${id}
-    `);
+    `;
+    this.logger.info(telegramMessage);
 
     if (totalPrice < 1600) {
-      await this.telegramBot.sendMessage(
-        process.env.TELEGRAM_CHAT_ID,
-        `${totalPrice} € ${title}
-  ${rooms} rooms flat, ${livingArea}
-  https://www.immobilienscout24.de/expose/${id}
-  `,
-      );
+      this.sendTelegramPushQueue.next(telegramMessage);
     }
   }
 
