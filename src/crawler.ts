@@ -200,7 +200,9 @@ export default class Crawler {
       );
     }
 
-    const totalPrice = this.extractNumber(totalRent) + this.extractNumber(garageCost) + 50;
+    const internetCost = 50;
+    const electricityCost = 50;
+    const totalPrice = this.extractNumber(totalRent) + this.extractNumber(garageCost) + internetCost + electricityCost;
     const telegramMessage = `${totalPrice} € ${title}
     ${rooms} rooms flat, ${livingArea}
     https://www.immobilienscout24.de/expose/${id}
