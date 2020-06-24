@@ -194,6 +194,11 @@ export default class Crawler {
 
     const totalPrice = this.extractNumber(totalRent) + this.extractNumber(garageCost) + 50;
 
+    this.logger.info(`${totalPrice} € ${title}
+    ${rooms} rooms flat, ${livingArea}
+    https://www.immobilienscout24.de/expose/${id}
+    `);
+
     if (totalPrice < 1600) {
       await this.telegramBot.sendMessage(
         process.env.TELEGRAM_CHAT_ID,
